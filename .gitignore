@@ -7,4 +7,5 @@
 *.iml
 out
 gen
-!/pom.xml
+/pom.xml
+/target
