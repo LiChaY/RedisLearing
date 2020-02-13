@@ -20,10 +20,7 @@ public class Main {
         role.setRoleName("role_name_1");
         redisTemplate.opsForValue().set("role_1", role);
         Role role_1 = (Role) redisTemplate.opsForValue().get("role_1");
-        SessionCallback sessionCallback=()->{
 
-
-        }
         System.out.println(role_1);
 
 
