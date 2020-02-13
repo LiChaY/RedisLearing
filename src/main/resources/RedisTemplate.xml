@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<!--    配置 Jedis Pool -->
+    <bean class="redis.clients.jedis.JedisPoolConfig" id="jedisPoolConfig">
+        <property name="maxIdle" value="50"></property>
+        <property name="maxTotal" value="100"/>
+        <property name="maxWaitMillis" value="20000"/>
+    </bean>
+<!--    配置 JedisConnectionFactory-->
+    <bean class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+          id="connectionFactory">
+        <property name="hostName" value="localhost"/>
+        <property name="port" value="6379"/>
+        <property name="poolConfig" ref="jedisPoolConfig"/>
+    </bean>
+<!--    配置 序列化器 ，普通的连接使用没法把 java 对象直接存入 Redis -->
+    <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"
+          id="jdkSerializationRedisSerializer"></bean>
+    <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"
+          id="stringRedisSerializer"/>
+<!--    配置 redisTemplate -->
+    <bean class="org.springframework.data.redis.core.RedisTemplate" id="redisTemplate">
+        <property name="keySerializer" ref="stringRedisSerializer"/>
+        <property name="valueSerializer" ref="jdkSerializationRedisSerializer"/>
+        <property name="connectionFactory" ref="connectionFactory"/>
+    </bean>
+</beans>
