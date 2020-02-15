@@ -24,6 +24,7 @@
     <bean class="org.springframework.data.redis.core.RedisTemplate" id="redisTemplate">
         <property name="keySerializer" ref="stringRedisSerializer"/>
         <property name="valueSerializer" ref="stringRedisSerializer"/>
+        <property name="defaultSerializer" ref="stringRedisSerializer"/>
         <property name="connectionFactory" ref="connectionFactory"/>
     </bean>
 </beans>
