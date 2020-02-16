@@ -20,7 +20,6 @@ public class RedisMulti {
     public static void main(String[] args) {
         ApplicationContext context=new ClassPathXmlApplicationContext("RedisTemplate.xml");
         RedisTemplate redisTemplate = context.getBean(RedisTemplate.class);
-
         SessionCallback sessionCallback=new SessionCallback() {
             @Override
             public Object execute(RedisOperations redisOperations) throws DataAccessException {

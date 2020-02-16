@@ -2,29 +2,58 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-<!--    配置 Jedis Pool -->
+    <!--    配置 Jedis Pool -->
     <bean class="redis.clients.jedis.JedisPoolConfig" id="jedisPoolConfig">
         <property name="maxIdle" value="50"></property>
         <property name="maxTotal" value="100"/>
         <property name="maxWaitMillis" value="20000"/>
     </bean>
-<!--    配置 JedisConnectionFactory-->
+    <!--    配置 JedisConnectionFactory-->
     <bean class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
           id="connectionFactory">
         <property name="hostName" value="localhost"/>
         <property name="port" value="6379"/>
         <property name="poolConfig" ref="jedisPoolConfig"/>
     </bean>
-<!--    配置 序列化器 ，普通的连接使用没法把 java 对象直接存入 Redis -->
+    <!--    配置 序列化器 ，普通的连接使用没法把 java 对象直接存入 Redis -->
     <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"
           id="jdkSerializationRedisSerializer"></bean>
     <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"
           id="stringRedisSerializer"/>
-<!--    配置 redisTemplate -->
+    <!--    配置 redisTemplate -->
     <bean class="org.springframework.data.redis.core.RedisTemplate" id="redisTemplate">
         <property name="keySerializer" ref="stringRedisSerializer"/>
         <property name="valueSerializer" ref="stringRedisSerializer"/>
         <property name="defaultSerializer" ref="stringRedisSerializer"/>
         <property name="connectionFactory" ref="connectionFactory"/>
+    </bean>
+    <!--    消息订阅：实现Spring提供的MessageListener ， 配置bean-->
+    <bean class="com.li.MessageListener.MessageListener" id="messageListener">
+        <property name="redisTemplate" ref="redisTemplate"/>
+    </bean>
+    <!--    配置Spring提供的RedisMessageListenerContainer 监听容器 -->
+    <bean class="org.springframework.data.redis.listener.RedisMessageListenerContainer" id="container"
+          destroy-method="destroy">
+        <!--        redis连接工厂-->
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!--        连接池，只要线程池生存，才能继续监听-->
+        <property name="taskExecutor">
+            <bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
+                <property name="poolSize" value="3"/>
+            </bean>
+        </property>
+        <!--        消息监听 Map-->
+        <property name="messageListeners">
+            <map>
+                <!--                配置监听者，key-ref 和 bean id 定义一致-->
+                <entry key-ref="messageListener">
+                    <!--                    监听类-->
+                    <bean class="org.springframework.data.redis.listener.ChannelTopic">
+                        <constructor-arg value="chat"/>
+                    </bean>
+                </entry>
+
+            </map>
+        </property>
     </bean>
 </beans>
